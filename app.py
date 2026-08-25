@@ -3,7 +3,7 @@ import edge_tts
 import asyncio
 import requests
 from PIL import Image
-from moviepy.editor import ImageClip, AudioFileClip
+import moviepy.editor as mp
 import os
 
 VOICES = {
@@ -33,8 +33,13 @@ def generate_video(prompt, reference_image, dialogue, voice_choice):
         voice_id = VOICES.get(voice_choice, "bn-IN-PradeepNeural")
         
         loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        asyncio.set_loop(loop) if hasattr(asyncio, "set_loop") else asyncio.set_event_loop(loop)
         loop.run_until_complete(text_to_speech(dialogue, voice_id, audio_path))
+
+        try:
+            from moviepy.editor import ImageClip, AudioFileClip
+        except ImportError:
+            from moviepy import ImageClip, AudioFileClip
 
         audio_clip = AudioFileClip(audio_path)
         duration = max(audio_clip.duration, 5.0)
